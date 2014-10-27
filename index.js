@@ -50,7 +50,10 @@
             path: Ho.path('views')
         })
 
+        // Setup tasks
+        Ho.tasks();
+
         return server;
     });
- 
+
 })(global);

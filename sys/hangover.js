@@ -11,26 +11,35 @@
 
     'use strict';
 
-    // util module
-    var $$util = require('util');
+    try {
+        // util module
+        var $$util = require('util');
 
-    // fs module
-    var $$fs = require('fs');
+        // fs module
+        var $$fs = require('fs');
 
-    // file module
-    var $$file = require('file');
+        // file module
+        var $$file = require('file');
 
-    // path module
-    var $$path = require('path');
+        // path module
+        var $$path = require('path');
 
-    // boom module
-    var $$boom = require('boom');
+        // boom module
+        var $$boom = require('boom');
 
-    // joi module
-    var $$joi = require('joi');
+        // joi module
+        var $$joi = require('joi');
 
-    // underscore module
-    var $$underscore = require('underscore');
+        // underscore module
+        var $$underscore = require('underscore');
+
+        // cron module
+        var $$cron = require('cron').CronJob;
+    } catch (e) {
+        console.error("Undefined module - please try a npm install and restart hangover");
+        console.error(e);
+        process.exit(0);
+    }
 
     // differents paths
     var $$paths = {
@@ -38,7 +47,9 @@
         controllers: $$path.join(__dirname, '../api/controllers/'),
         helpers: $$path.join(__dirname, '../api/helpers/'),
         models: $$path.join(__dirname, '../api/models/'),
+        logs: $$path.join(__dirname, '../logs/'),
         routes: $$path.join(__dirname, '../api/routes/'),
+        tasks: $$path.join(__dirname, '../api/tasks/'),
         views: $$path.join(__dirname, '../api/views/')
     };
 
@@ -60,6 +71,9 @@
     // models
     var $$models = {};
 
+    // tasks
+    var $$tasks = null;
+
     // current model
     var $$currentModel = null;
 
@@ -67,6 +81,8 @@
      * Return HangOver instance
      */
     module.exports = new (function() {
+
+        var $self = this;
 
         /**
          * $file(string: path, string: filename?)
@@ -505,6 +521,156 @@
                 }
                 return _routes;
             },
+
+
+            /**
+             * HangOver.tasks()
+             * @description
+             * Load tasks rules and store them to the `$$tasks` private var
+             */
+            tasks: function() {
+                if (! $$tasks)
+                    $$tasks = $get('tasks');
+
+                /**
+                 * setupTask(object: task)
+                 * installing a new scheduled task
+                 * `task` is an object
+                 *   name: string
+                 *   at: string 
+                 *   task: function
+                 */
+                var setupTask = function(file, element) {
+
+                    /**
+                     * job
+                     * class passed in parameter to your task
+                     */
+                    $$tasks[file][element].$job = new (function() {
+                        var self = this;
+
+                        return {
+
+                            $$count: 0,
+
+                            $$logfile: null,
+
+                            $$logfd: null,
+
+                            $$state: false,
+
+                            $$time: null,
+
+                            // count()
+                            // return number of task iterations
+                            count: function() {
+                                return this.$$count;
+                            },
+
+                            // getAttribute(string: attribute)
+                            // return an attribute
+                            getAttribute: function(attribute) {
+                                return this[attribute];
+                            },
+
+                            // log(string: message)
+                            // throw a `message` on `logfile` fd
+                            log: function(message) {
+                                if (this.$$logfile === null) {
+                                    return Ho.out(message);
+                                }
+                                if (this.$$logfd === null) {
+                                    this.$$logfd = $$fs.openSync($file('logs', this.$$logfile), 'w+');
+                                }
+                                message = $$util.format('%s ' + message + "\r\n", new Date());
+                                $$fs.write(this.$$logfd, message);
+                                return this;
+                            },
+
+                            // job.run(boolean: state?)
+                            // setter / getter
+                            // if `state` is not given, `job.run` will
+                            // return the previous state
+                            // will be set on `false` by default on the first execution
+                            run: function(state) {
+                                if (typeof state === 'undefined') return this.$$state;
+                                this.$$state = state;
+                            },
+
+                            // setAttribute(string: attribute, mixed: value)
+                            // set an attribute
+                            // some `attribute` names are reserved words
+                            // banned attributes name are
+                            // - vars beginning by `$$`
+                            // - count
+                            // - getAttribute
+                            // - log
+                            // - setAttribute
+                            // - run
+                            // - time
+                            setAttribute: function(attribute, value) {
+                                if (attribute.length == 0) {
+                                    throw new Error("You must enter an attribute name");
+                                    return this;
+                                }
+                                if (attribute.substr(0, 2) == '$$') {
+                                    throw new Error("An attribute cant start with $$");
+                                    return this;
+                                }
+                                var bannedWords = ['count', 'getAttribute', 'log', 'setAttribute',
+                                    'run', 'time'];
+                                if ($$underscore.indexOf(bannedWords, attribute) == -1) {
+                                    throw new Error(attribute + " is a reserved word");
+                                    return this;
+                                }
+                                if (typeof value === 'undefined') {
+                                    throw new Error("You must set a value");
+                                    return this;
+                                }
+                                this[attribute] = value;
+                                return this;
+                            },
+
+                            // time()
+                            // return last runned Date
+                            time: function() {
+                                return $$time;
+                            }
+                        }
+                    });
+
+                    if (typeof $$tasks[file][element].logfile !== 'undefined') {
+                        $$tasks[file][element].$job.$$logfile = $$tasks[file][element].logfile;
+                    }
+
+                    // install task in scheduleJob
+                    $$tasks[file][element].$cron = new $$cron({
+
+                        cronTime: $$tasks[file][element].at,
+
+                        onTick: function() {
+                            var job = $$tasks[file][element].$job;
+
+                            if (job.$$count == 0) {
+                                job.run(false);
+                            }
+                            $$tasks[file][element].task.call(Ho, job);
+                            job.$$count += 1;
+                        },
+
+                        start: true
+
+                    });
+                };
+
+                for (var k in $$tasks) {
+                    for (var o in $$tasks[k]) {
+                        setupTask(k, o);
+                    }
+                }
+            },
+
+
 
             /**
              * HangOver.out(string: message)
