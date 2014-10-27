@@ -54,6 +54,15 @@
     // routes list
     var $$routes = null;
 
+    // schemas
+    var $$schemas = {};
+
+    // models
+    var $$models = {};
+
+    // current model
+    var $$currentModel = null;
+
     /**
      * Return HangOver instance
      */
@@ -84,6 +93,32 @@
                 });
             });
             return contents;
+        });
+
+        /**
+         * $module(string: module, function: inclusionFn?)
+         * @type private
+         * @description
+         * Return a module instance or execute `inclusionFn` callback under Ho instance
+         * (with the module instance passed in first parameter)
+         */
+        var $module = (function(module, inclusionFn) {
+            if (module.indexOf('.') >= 0) {
+                var component = module.split('.');
+                var _module = component[0];
+            } else {
+                var _module = module;
+            }
+
+            if (! $$modules[_module]) {
+                throw new Error("Undefined module " + _module);
+                return null;
+            }
+
+            if (inclusionFn && typeof inclusionFn === 'function') {
+                $$singletons[module] = inclusionFn.call(this, $$modules[_module]);
+            }
+            return $$modules[_module];
         });
 
         /**
@@ -118,10 +153,78 @@
          * Override the hangover reply object
          */
         var $overrideReply = (function(reply) {
+            // local copy for reply.view
             var __view = reply.view;
 
+            // default response callbacks (when reply.response is called)
+            var __config = {
+                error: function(error) {
+                    return (error);
+                },
+                success: function(doc) {
+                    return {success: true};
+                }
+            };
+
             /**
-             * reply.view
+             * reply.set(object: config)
+             * where `config` is an object like :
+             * {
+             *    error: function(error) {
+             *      return error;
+             *    },
+             *    success: function(document) {
+             *      return { data: { message: 'hello world' } };
+             *    }
+             * }
+             * will override the defaults `reply.response` with the given callbacks
+             * you must call `reply.response` after theses assignments
+             */
+            reply.set = function(config) {
+                if (config.success && typeof config.success === 'function') {
+                    __config.success = config.success
+                }
+                if (config.error && typeof config.error === 'function') {
+                    __config.error = config.error;
+                }
+            }
+
+            /**
+             * reply.response(object: error?, object: document?)
+             * must be called in a `Ho.model(modelname)` callback instance
+             */
+            reply.response = function(error, doc) {
+                if (error) {
+                    return reply.call(this, __config.error(error));
+                }
+                if (doc) {
+                    return reply.call(this, __config.success(doc));
+                }
+                // nothing to do... i'm waiting the mongo response
+            };
+
+            /**
+             * reply.success(mixed: extra?)
+             * return a success response
+             * equivalent to
+             * {success: true}
+             ``
+                reply.success();
+                => {success: true};
+                reply.success({name: 'Paul'});
+                => {success: true, meta: {name: 'Paul'}}
+             */
+            reply.success = function(extra) {
+                var output = { success: true };
+                if (extra && typeof extra === 'object') {
+                    output = $$underscore.extend(output, extra);
+                }
+                reply(output);
+                return reply;
+            };
+
+            /**
+             * reply.view(string: file, object: vars?)
              * adding some functions to the view
              */
             reply.view = function(view, vars) {
@@ -160,11 +263,20 @@
 
 
             /**
+             * HangOver.db
+             * Simple `mongoose` module accessor
+             */
+            db: function() {
+                return $module('mongoose').bind(this);
+            },
+
+
+            /**
              * HangOver.joi
              * Simple `joi` module accessor
              */
             joi: $$joi,
-            
+
 
             /**
              * HangOver.config(string: attribute?)
@@ -266,29 +378,66 @@
 
 
             /**
+             * HangOver.models()
+             * @description
+             * Load models directives
+             */
+            models: function() {
+                var models = $get('models');
+                for (var k in models) {
+                    var model = models[k];
+                    if (! model.schema) {
+                        throw new Error("Undefined schema for model " + k);
+                        break;
+                    }
+                    if (! model.collection) {
+                        throw new Error("You must set a collection name for " + k);
+                        break;
+                    }
+
+                    $module('mongoose', function(mongoose) {
+                        var Schema = new mongoose.Schema(model.schema, {collection: model.collection});
+                        if (model.pre) {
+                            for (var pre in model.pre) {
+                                Schema.pre(pre, model.pre[pre]);
+                            }
+                        }
+                        $$schemas[model.collection] = Schema;
+                        $$models[model.collection] = mongoose.model(model.collection, Schema);
+                    });
+                }
+            },
+
+
+            /**
+             * HangOver.model(string: model, function: callback?)
+             * @description
+             * return model instance
+             * if `callback` is setted, the callback instance will be invoked with
+             * `model` instance in parameter.
+             * the $$currentModel variable will be setted with the `model` parameter
+             */
+            model: function(model, callback) {
+                if (!$$models[model]) {
+                    throw new Error("undefined model " + model);
+                    return null;
+                }
+                if (callback && typeof callback === 'function') {
+                    $$currentModel = model;
+                    callback.call(this, new ($$models[model]));
+                }
+                return $$models[model];
+            },
+
+
+            /**
              * HangOver.module(string: module, function: inclusionFn?)
              * Return a module instance
              * If `inclusionFn` is passed, your function will be called
              * in the HangOver instance (with asked module in 1st parameter of your callback)
              */
             module: function(module, inclusionFn) {
-
-                if (module.indexOf('.') >= 0) {
-                    var component = module.split('.');
-                    var _module = component[0];
-                } else {
-                    var _module = module;
-                }
-
-                if (! $$modules[_module]) {
-                    throw new Error("Undefined module " + _module);
-                    return null;
-                }
-
-                if (inclusionFn && typeof inclusionFn === 'function') {
-                    $$singletons[module] = inclusionFn.call(this, $$modules[_module]);
-                }
-                return $$modules[_module];
+                return $module(module, inclusionFn);
             },
 
 
