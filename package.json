@@ -1,6 +1,6 @@
 {
   "name": "HAngOver",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A structured theme app for a HapiJS / AngularJS website (or something else)",
   "main": "index.js",
   "scripts": {
