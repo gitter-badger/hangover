@@ -26,6 +26,7 @@
 
         Ho.module('mongoose').connection.on('open', function() {
             Ho.out("HangOver is connected on your Mongo Database over Mongoose.");
+            Ho.models();
         });
         Ho.module('mongoose').connection.on('error', Ho.err.bind(console));
 
