@@ -2,7 +2,7 @@
 <html ng-app="App">
 <head>
     <title><?meta.title?></title>
-    <script src='/assets/js/build/app.js<?version?>'></script>
+    <script src='/assets/js/build/all.min.js<?version?>'></script>
 </head>
 <body ng-controller="RootController">
     <div id="root">
@@ -11,6 +11,10 @@
         </header>
 
         <p><?description?></p>
+
+        <form ng-submit="submission()">
+            <input type="email" ng-model="email"><button type="submit">Request an invite</button>
+        </form>
 
     </div>
 </body>
