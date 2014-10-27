@@ -319,7 +319,7 @@
                 if (! $$routes)
                     $$routes = $get('routes');
 
-                var _routes = {};
+                var _routes = [];
 
                 // Anonyme function
                 // @description
@@ -330,7 +330,7 @@
                 for (var key in $$routes) {
                     for (var dir in $$routes[key]) {
                         var route = overflow($$routes[key][dir]);
-                        _routes = $$underscore.extend(_routes, route);
+                        _routes.push(route);
                     }
                 }
                 return _routes;
