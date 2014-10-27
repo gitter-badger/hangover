@@ -1,6 +1,6 @@
 {
   "name": "hangover",
-  "version": "0.0.2",
+  "version": "0.0.2-1",
   "description": "A structured theme app for a HapiJS / AngularJS website (or something else)",
   "main": "index.js",
   "scripts": {
@@ -36,6 +36,7 @@
     "gulp-imagemin": "^1.2.1",
     "gulp-sourcemaps": "^1.2.4",
     "gulp-debug": "^1.0.1",
-    "gulp-bower": "0.0.6"
+    "gulp-bower": "0.0.6",
+    "mocha": "^2.0.1"
   }
 }
