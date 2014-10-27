@@ -2,6 +2,7 @@
 <html ng-app="App">
 <head>
     <title><?meta.title?></title>
+    <link type='text/css' rel='stylesheet' href='/assets/css/style.css'>
     <script src='/assets/js/build/all.min.js<?version?>'></script>
 </head>
 <body ng-controller="RootController">
@@ -13,9 +14,10 @@
         <p><?description?></p>
 
         <form ng-submit="submission()">
+            <p>A simple <strong>POST</strong> example :-)</p>
             <input type="email" ng-model="email"><button type="submit">Request an invite</button>
-            <httpcallback></httpcallback>
         </form>
+        <httpcallback></httpcallback>
 
     </div>
 </body>
