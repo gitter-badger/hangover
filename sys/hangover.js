@@ -23,6 +23,12 @@
     // path module
     var $$path = require('path');
 
+    // boom module
+    var $$boom = require('boom');
+
+    // joi module
+    var $$joi = require('joi');
+
     // underscore module
     var $$underscore = require('underscore');
 
@@ -145,6 +151,20 @@
              */
             $reply: null,
 
+
+            /**
+             * HangOver.boom
+             * Simple `boom` module accessor
+             */
+            boom: $$boom,
+
+
+            /**
+             * HangOver.joi
+             * Simple `joi` module accessor
+             */
+            joi: $$joi,
+            
 
             /**
              * HangOver.config(string: attribute?)
@@ -324,6 +344,7 @@
                 // Anonyme function
                 // @description
                 var overflow = function(route) {
+                    // @todo
                     return route;
                 };
 
