@@ -5,15 +5,10 @@ HapiJS + Mongoose + AngularJS template
 
 ##Installation
 
-** From npm **
-```
-npm install hangover
-```
-
 ** From git **
 ```
-git clone git@github.com:paulrad/hangover.git ./hangover
-cd hangover && npm install`
+git clone git@github.com:paulrad/hangover.git ./my-project
+cd my-project && npm install`
 node index.js
 ```
 
