@@ -20,7 +20,7 @@ module.exports = {
          * @see for references
          * http://docs.mongodb.org/manual/reference/connection-string/
          */
-        uri: 'mongodb://localhost:27017'
+        uri: 'mongodb://localhost:27017/hangover'
     },
 
 
@@ -39,6 +39,12 @@ module.exports = {
         options: {
 
             cors: true,
+
+            validation: {
+
+                abortEarly: false,
+
+            },
 
             router: {
 
