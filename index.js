@@ -2,23 +2,9 @@
  * HangOver
  * Hapi Angular (worst pun)
  * Structured based app
- * 
  *
- * API References
- *
- *
- * Ho.config
- *
- * Ho.err
- *
- * Ho.leton
- *
- * Ho.module
- *
- * Ho.require
- *
- * Ho.out
- *
+ * @ sys/hangover.js
+ * api references
  */
 
 ;(function  HangOver(root, undefined) {
