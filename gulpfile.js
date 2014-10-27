@@ -3,7 +3,7 @@
     var path = require('path');
 
     var paths = {
-        js: path.join(__dirname, 'assets/js/'),
+        js: path.join('assets/js/'),
     };
 
     var files = {
@@ -28,20 +28,28 @@
     var bower = require('gulp-bower');
 
     /**
+     * Bower routine
+     */
+    gulp.task('bower', function() {
+        gutil.log("JS : install required vendors");
+
+        return bower(paths.js + 'vendors')
+            .pipe(gulp.dest(paths.js + 'vendors'));
+    });
+
+    /**
      * Script routine
-     *
      */
     gulp.task('scripts', function() {
         gutil.log("JS : concat and uglifycation for files presents in : ");
+
         for (var k in files.js) {
             gutil.log(files.js[k]);
         }
-        gutil.log("Destination is : ", paths.js + 'build')
-            
-            bower(paths.js + 'vendors')
-            .pipe(gulp.dest(paths.js + 'vendors'));
 
-            return gulp.src(files.js)
+        gutil.log("Destination is : ", paths.js + 'build');
+
+        return gulp.src(files.js)
             .pipe(sourcemaps.init())
             .pipe(concat('all.js'))
             .pipe(gulp.dest(paths.js + 'build'))
@@ -51,6 +59,15 @@
             .pipe(gulp.dest(paths.js + 'build'));
     });
 
-    gulp.task('default', ['scripts'])
+    /**
+     * Watch routine
+     */
+    gulp.task('watch', function() {
+        gulp.watch(files.js, ['scripts']);
+    });
+
+    // Registering tasks
+
+    gulp.task('default', ['watch', 'bower', 'scripts']);
 
 })(require('gulp'));
