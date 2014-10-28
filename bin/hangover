@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
-;(function(command, undefined) {
+/**
+ * HangOver cli program
+ *
+ * @todo refactoring
+ */
+
+;(function(commands, undefined) {
 
     var __version = '0.1.5';
 
@@ -12,60 +18,135 @@
 
     var $$ncp = require('ncp').ncp;
 
+
+    /**
+     *
+     * Methods
+     *
+     */
+
+
     // usage()
     // display usage on stderr
     var usage = (function() {
-        $$util.error("hangover [project]");
-        $$util.error("[project] is the path where hangover will initialise your project");
+        $$util.error("hangover [new name [path .] | start [path .]]");
     });
 
-    var cmd = {
-        // cmd.version()
-        // show hangover version number
+    // options.[command]
+    var options = {
+        // options.version()
+        // show hangover version number and then, exit
         version: function() {
             $$util.puts("hangover version " + __version);
             process.exit();
         }
-    } 
+    };
 
-    if (command === undefined) {
-        usage();
-        process.exit(0);
-    }
+    // startApp(string: path)
+    var startApp = function(path) {
+        var exec = require('child_process').exec,
+            child;
 
-    if (command.substr(0, 2) == '--') {
-        command = command.substr(2);
-        if (cmd[command] && typeof cmd[command] === 'function') {
-            cmd[command]();
-        } else {
-            $$util.error("Undefined command");
-            usage();
+        if (! path) {
+            path = ".";
         }
-    }
+        if (! $$fs.existsSync(path)) {
+            $$util.error("I can't fetch the given path");
+            process.exit();
+        }
 
-    var path = command,
-        project = path.split('/')[path.split('/').length-1];
+        var runApp = function(path) {
+            $$util.puts("Hangover starts now :-)");
+            child = exec('cd ' + path + ' && npm start', function(error, stdout, stderr) {
+                // @todo
+                console.log(stdout);
+                console.log(stderr);
+            });
+        };
 
-    if ($$fs.existsSync(path)) {
-        if ($$extfs.isEmptySync(path) === false) {
-            $$util.error("The destination path must be an empty directory");
+        if (! $$fs.existsSync(path + '/node_modules')) {
+            $$util.puts("Hangover installing dependencies (npm install)... please wait a moment.");
+            $$util.puts("This operation will performed only on the first launch and cant take few minutes depending the quality of your connection.");
+            child = exec('cd ' + path + ' && npm install --silently && cd -', function(error, stdout, stderr) {
+                if (error) {
+                    $$util.error(error);
+                    process.exit();
+                } else {
+                    runApp(path);
+                }
+            })
+        } else {
+            runApp(path);
+        }
+    };
+
+    // newApp(string: name, string: path?)
+    var newApp = function(name, path) {
+        if (! name) {
+            $$util.error("Undefined project name");
+            usage();
+            process.exit();
+        }
+        if (! path) {
+            path = ".";
+        }    
+        if ($$fs.existsSync(path)) {
+            if ($$extfs.isEmptySync(path) === false) {
+                $$util.error("The destination path must be an empty directory");
+                process.exit(0);
+            }
+        }
+        if (! $$fs.existsSync(__dirname + '/package/')) {
+            $$util.error("Hangover seems to be broken...");
             process.exit(0);
         }
-    }
+        $$ncp(__dirname + '/package/', path, function(err) {
+            if (err) {
+                throw new Error(err);
+                return console.error(err);
+            }
+            $$util.puts("Your project is successfully installed in " + path);
+            $$util.puts("Go to " + path);
+            $$util.puts("And simply run : hangover start");
+        });
+    };
 
-    if (! $$fs.existsSync(__dirname + '/package/')) {
-        $$util.error("Hangover seems to be broken...");
-        process.exit(0);
-    }
 
-    $$ncp(__dirname + '/package/', path, function(err) {
-        if (err) {
-            throw new Error(err);
-            return console.error(err);
+    /**
+     *
+     * Commands parsing
+     *
+     */
+
+    // parse options
+    // for futur use (silent mode...)
+    for (var i = 0; i < commands.length; i++) {
+        var command = commands[i];
+
+        if (command.substr(0, 2) == '--') {
+            command = command.substr(2);
+            if (options[command] && typeof options[command] === 'function') {
+                options[command]();
+            }
         }
-        $$util.puts("Your project is successfully installed in " + path);
-        $$util.puts("Go to " + path);
-        $$util.puts("And then... start your server via node ./server.js");
-    });
+    }
 
-})(process.argv.splice(2)[0])
+    // parse commands (ugly...)
+
+    if (commands[0]) {
+        if (commands[0] == 'start') {
+            startApp(commands[1]);
+        } else if (commands[0] == 'new') {
+            newApp(commands[1], commands[2]);
+        } else {
+            // equivalent to start path
+            startApp(commands[0]);
+        }
+    }
+
+    // no argument
+    if (commands.length == 0) {
+        startApp();
+    }
+
+})(process.argv.splice(2))

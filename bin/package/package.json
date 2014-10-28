@@ -1,21 +1,17 @@
 {
-  "name": "hangover",
-  "version": "0.1.5",
-  "description": "A structured theme app for a HapiJS / AngularJS website (or something else)",
-  "main": "index.js",
+  "name": "__projectname__",
+  "version": "0.0.1",
+  "description": "__projectname__ - a hangover application",
+  "main": "server.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "keywords": [
-    "hapijs",
-    "angularjs",
-    "nodb"
+    "hangover"
   ],
-  "author": "Paul Rad <paul@paulrad.com>",
+  "author": "John Doe <john@doe.com>",
   "license": "MIT",
-  "bin": {
-    "hangover": "./bin/hangover"
-  },
   "dependencies": {
     "hapi": "^7.1.0",
     "mongoose": "^3.8.18",
@@ -23,11 +19,8 @@
     "underscore": "^1.7.0",
     "file": "^0.2.2",
     "boom": "^2.6.0",
-    "hapi-auth-basic": "^1.1.1",
     "joi": "^4.7.0",
-    "cron": "^1.0.5",
-    "extfs": "0.0.7",
-    "ncp": "^1.0.1"
+    "cron": "^1.0.5"
   },
   "devDependencies": {
     "gulp": "^3.8.9",
