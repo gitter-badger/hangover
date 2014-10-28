@@ -2,7 +2,7 @@
 
 ;(function(command, undefined) {
 
-    var __version = '0.1.0';
+    var __version = '0.1.2';
 
     var $$util = require('util');
 
@@ -64,6 +64,8 @@
             return console.error(err);
         }
         $$util.puts("Your project is successfully installed in " + path);
+        $$util.puts("Go to " + path + " and run a npm install");
+        $$util.puts("And then... start your server via node ./server.js");
     });
 
 })(process.argv.splice(2)[0])
