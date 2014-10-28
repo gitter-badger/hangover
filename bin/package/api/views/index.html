@@ -5,7 +5,7 @@
     <link type='text/css' rel='stylesheet' href='/assets/css/style.css'>
     <script src='/assets/js/build/all.min.js<?version?>'></script>
 </head>
-<body ng-controller="RootController">
+<body>
     <div id="root">
         <header>
             <h1><?title?></h1>
@@ -13,11 +13,8 @@
 
         <p><?description?></p>
 
-        <form ng-submit="submission()">
-            <p>A simple <strong>POST</strong> example :-)</p>
-            <input type="email" ng-model="email"><button type="submit">Request an invite</button>
-        </form>
-        <httpcallback></httpcallback>
+        <hang-video></hang-video>
+        <hang-video-reviews></hang-video-reviews>
 
     </div>
 </body>
