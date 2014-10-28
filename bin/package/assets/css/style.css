@@ -2,7 +2,7 @@ html,
 body {}
 
 html {}
-body {}
+body { font-family: tahoma, sans-serif; font-size: 13px; }
 
 h1,
 h2,
@@ -18,12 +18,10 @@ a {}
 header {}
 footer {}
 
-form { padding: 20px; background: #f1f2f3; text-align: center; }
-form p { padding: 0; margin: 0 }
-form input[type=email] { display: block; padding: 8px 12px; margin: 1em auto; min-width: 320px; border: 1px #333 solid }
-form input[type=email]:focus { outline: none; border-color: #f30; }
-form button[type=submit] { padding: 10px 24px; border: 0; border-radius: 2px; background: none; border: 1px #333 solid; cursor: pointer; text-transform: uppercase; }
-form button[type=submit]:hover,
-form button[type=submit]:active { border-color: #f30; background: #fff }
-
 #root { width: 960px; margin: 0 auto }
+
+.hang-video { width: 600px; height: 400px; overflow: hidden; background: #000; position: relative; border: 5px #333 solid; }
+.hang-video img { width: 100%; max-width: 100% }
+.hang-video .overlay { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 5; background: rgba(0, 0, 0, .25) }
+.hang-video span { font-size: 1.2em; position: absolute; display: inline-block; padding: 5px; background: #333; z-index: 10; color: #fff; top: 5px; left: 0; }
+.hang-video a { position: absolute; z-index: 10; top: 50%; left: 50%; margin-left: -80px; margin-top: -14px; border-radius: 4px; background: #f30; padding: 8px 0px; width: 160px; color: #fff; outline: none; border: none; text-decoration: none; text-transform: uppercase; text-align: center; cursor: pointer; }

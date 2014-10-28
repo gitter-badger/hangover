@@ -353,23 +353,39 @@
              *
              * Return a controller function from a specified controller file
              *
-             * @usage
-             ``
-             // Accessor for `index` function property in your controllers/myController.js file
+             * @examples
+             ```js
+             // Accessor for `index` function controller in your controllers/myController.js file
              Ho.controller('myController');
-             // Accessof for `article` function property in your controllers/myController.js file 
+             
+             // Accessor for `article` function controller in your controllers/myController.js file 
              Ho.controller('myController.article');
+
+             // Accessor for `videos.get` function controller in your controllers/api/videos.js file
+             Ho.controller('api/videos.get');
+             ```
              */
             controller: function(controllerName) {
                 if (! $$controllers)
                     $$controllers = $get('controllers');
 
                 var controller = controllerName.split('.');
-                var controllerFile = controller[0] + '.js',
-                    keyIndex = $file('controllers', controllerFile);
+
+                // force string conversion if undefined (?)
+                controller[0] = (controller[0] + '');
+
+                // remove / / from string
+                // eurk...
+                if (controller[0][0] == '/')
+                    controller[0] = controller[0].substring(1);
+                if (controller[0][controller[0].length-1] == '/')
+                    controller[0] = controller[0].substring(0, controller[0].length-1);
+
+                var controllerFile = controller[0] + '.js';
+                var keyIndex = $file('controllers', controllerFile);
 
                 if (! $$controllers[keyIndex]) {
-                    throw new Error("Undefined controller action " + keyIndex);
+                    return Ho.err("Undefined controller action " + keyIndex).throw();
                 }
                 controller.shift();
                 if (controller.length == 0) {
@@ -380,8 +396,7 @@
 
                 var controllerFn = $treeKeys($$controllers[keyIndex], controller);
                 if (! controllerFn) {
-                    throw new Error("Undefined controller metod " + controller);
-                    return false;
+                    return Ho.err("Undefined controller method " + controller).throw();
                 }
                 return function(request, reply) {
                     reply = $overrideReply(reply);
@@ -403,8 +418,15 @@
                     });
                     return this;
                 }
-                $$util.error(' /!\\ ' + message);
-                return new Error(message);
+                $$util.error('@: ' + message);
+                return new (function() {
+                    return {
+                        // show debug trace
+                        throw: function() {
+                            throw new Error(message);
+                        }
+                    }
+                });
             },
 
             /**
@@ -538,10 +560,40 @@
 
                 var _routes = [];
 
-                // Anonyme function
+                // @type private
+                // _normalizeRoutePathToController(string: path, string: mode)
+                // format a {path} to a hangover controller
+                // @examples
+                // 
+                // _normalizeRoutePathToController('/user/{userid}/profil', 'GET');
+                // => 'user/profil.get' (controllers/user/profil.js : get action)
+                // 
+                // _normalizeRoutePathToController('/api/video/{videoid}/reviews/', 'POST');
+                // => '/api/video/reviews.post' (controllers/api/video/reviews.js : post action)
+                // 
+                var _normalizeRoutePathToController = function(path, mode) {
+                    var stripped = path.replace(/\{.*\}/gi, '').replace(/\/\//gi, '/');
+                    return stripped + '.' + mode.toLowerCase();
+                };
+
+                // overflow(object: route)
+                // @type private
                 // @description
+                // will perform some nice stuffs (verifications & overflow)
+                // @return
+                // hapijs formatted route object
                 var overflow = function(route) {
-                    // @todo
+                    if (! route.path ||
+                        typeof route.path === 'string' && route.path.length == 0) {
+                        return Ho.err("Undefined route path").throw();
+                    }
+                    if (! route.method) {
+                        route.method = 'GET';
+                    }
+                    if (! route.handler) {
+                        route.handler = Ho.controller(_normalizeRoutePathToController(route.path, route.method));
+                    }
+
                     return route;
                 };
 

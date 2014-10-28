@@ -3,70 +3,56 @@
 
     var App = $angular.module('App', ['ngResource']);
 
-    App.factory('resourceInterceptor', ['$rootScope', function($rootScope) {
-        $rootScope.http = {};
-        return {
-            request: function() {
-                $rootScope.http.load = true;
-            },
-            response: function() {
-                $rootScope.http.load = false;
-                $rootScope.http.success = true;
-            },
-            responseError: function(e) {
-                $rootScope.http.load = false;
-                $rootScope.http.success = false;
-                $rootScope.http.error = e;
-            }
-        };
-    }])
-
-    App.factory('Invitations', ['$resource', 'resourceInterceptor', function($resource, resourceInterceptor) {
-        return $resource('/invitations/:id', {id: '@id'}, {
-            save: {
-                method: 'POST',
-                interceptor: resourceInterceptor
-            }
-        });
+    // resource HTTPVideos
+    App.factory('HTTPVideos', ['$resource', function($resource) {
+        return $resource('/api/videos/:id', {id: '@id'});
     }]);
 
-    App.directive('httpcallback', ['$rootScope', function($rootScope) {
+    // resource HTTPVideosReviews
+    App.factory('HTTPVideosReviews', ['$resource', function($resource) {
+        return $resource('/api/videos/:id/reviews', {id: '@id'});
+    }]);
+
+    // hang-video directive
+    App.directive('hangVideo', ['$rootScope', 'HTTPVideos', function($rootScope, HTTPVideos) {
         return {
             restrict: 'EA',
             template: [
-                '<div>',
-                    '<div ng-show="state.load">Chargement en cours</div>',
-                    '<div ng-show="!state.load">',
-                        '<div ng-show="state.success">Insertion reussie</div>',
-                        '<div ng-show="state.success === false">',
-                            '<div>Une erreur est survenue, détails ci-dessous</div>',
-                            '<pre>{{state.error|json}}</pre>',
-                        '</div>',
-                    '</div>',
+                '<div class="hang-video">',
+                    '<div class="overlay"></div>',
+                    '<span>{{video.title}}</span>',
+                    '<img ng-src="{{video.poster}}">',
+                    '<a ng-click="launch()">play video</a>',
                 '</div>'
             ].join(''),
             link: function($scope) {
-                $scope.state = $rootScope.http;
+                $scope.video = HTTPVideos.get({id: '12345'});
+                $scope.launch = function() {
+                    alert("Go go ! Sorry.. noop function :-)");
+                };
             }
         }
     }]);
 
-    App.controller('RootController', ['$scope', 'Invitations', function($scope, Invitations) {
-
-        $scope.httpResponse = null;
-        $scope.email = '';
-
-        $scope.submission = (function SubmitEmail() {
-            var invitation = new Invitations({
-                email: $scope.email
-            });
-
-            invitation.$save(function(data) {
-                console.log(invitation);
-                $scope.httpResponse = data;
-            });
-        });
+    // hang-video directive
+    App.directive('hangVideoReviews', ['$rootScope', 'HTTPVideosReviews', function($rootScope, HTTPVideosReviews) {
+        return {
+            restrict: 'EA',
+            template: [
+                '<div class="hang-reviews">',
+                    '<ul>',
+                        '<li ng-repeat="review in reviews">',
+                            '<span class="author">{{review.author}}</span>',
+                            '<div class="comment">{{review.comment}}</div>',
+                            '<span class="review">{{review.review}}/5</span>',
+                        '</li>',
+                    '</ul>',
+                '</div>'
+            ].join(''),
+            link: function($scope) {
+                $scope.reviews = HTTPVideosReviews.query({id: '12345'});
+            }
+        }
     }]);
-
 
 })(window.angular);
