@@ -8,7 +8,7 @@
 
 ;(function(commands, undefined) {
 
-    var __version = '0.1.5';
+    var __version = '0.2.0';
 
     var $$util = require('util');
 
