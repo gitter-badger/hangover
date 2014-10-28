@@ -23,10 +23,9 @@ npm install hangover -g
 
 ##Generate a Hangover website
 ```bash
-hangover my-beautiful-website
-cd my-beautiful-website
-npm install
-node ./server.js
+hangover new my-project ./my-project
+cd ./my-project
+hangover start
 ```
 
 ##Wiki
