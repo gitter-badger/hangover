@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+
+;(function(command, undefined) {
+
+    var $$util = require('util');
+
+    var $$fs = require('fs');
+
+    var $$extfs = require('extfs');
+
+    var $$ncp = require('ncp').ncp;
+
+    var usage = (function() {
+        $$util.error("hangover [project]");
+        $$util.error("[project] is the path where hangover will initialise your project");
+    });
+
+    if (command === undefined) {
+        usage();
+        process.exit(0);
+    }
+
+    var path = command,
+        project = path.split('/')[path.split('/').length-1];
+
+    if ($$fs.existsSync(path)) {
+        if ($$extfs.isEmptySync(path) === false) {
+            $$util.error("The destination path must be an empty directory");
+            process.exit(0);
+        }
+    }
+
+    if (! $$fs.existsSync('../package/')) {
+        $$util.error("Hangover seems to be broken...");
+        process.exit(0);
+    }
+
+    $$ncp('../package/', path, function(err) {
+        if (err) {
+            throw new Error(err);
+            return console.error(err);
+        }
+        $$util.puts("Your project is successfully installed in " + path);
+    });
+
+})(process.argv.splice(2)[0])

@@ -1,0 +1,29 @@
+html,
+body {}
+
+html {}
+body {}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {}
+
+p {}
+
+a {}
+
+header {}
+footer {}
+
+form { padding: 20px; background: #f1f2f3; text-align: center; }
+form p { padding: 0; margin: 0 }
+form input[type=email] { display: block; padding: 8px 12px; margin: 1em auto; min-width: 320px; border: 1px #333 solid }
+form input[type=email]:focus { outline: none; border-color: #f30; }
+form button[type=submit] { padding: 10px 24px; border: 0; border-radius: 2px; background: none; border: 1px #333 solid; cursor: pointer; text-transform: uppercase; }
+form button[type=submit]:hover,
+form button[type=submit]:active { border-color: #f30; background: #fff }
+
+#root { width: 960px; margin: 0 auto }
