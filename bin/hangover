@@ -2,6 +2,8 @@
 
 ;(function(command, undefined) {
 
+    var __version = '0.1.0';
+
     var $$util = require('util');
 
     var $$fs = require('fs');
@@ -10,14 +12,35 @@
 
     var $$ncp = require('ncp').ncp;
 
+    // usage()
+    // display usage on stderr
     var usage = (function() {
         $$util.error("hangover [project]");
         $$util.error("[project] is the path where hangover will initialise your project");
     });
 
+    var cmd = {
+        // cmd.version()
+        // show hangover version number
+        version: function() {
+            $$util.puts("hangover version " + __version);
+            process.exit();
+        }
+    } 
+
     if (command === undefined) {
         usage();
         process.exit(0);
+    }
+
+    if (command.substr(0, 2) == '--') {
+        command = command.substr(2);
+        if (cmd[command] && typeof cmd[command] === 'function') {
+            cmd[command]();
+        } else {
+            $$util.error("Undefined command");
+            usage();
+        }
     }
 
     var path = command,
@@ -30,12 +53,12 @@
         }
     }
 
-    if (! $$fs.existsSync('../package/')) {
+    if (! $$fs.existsSync(__dirname + '/package/')) {
         $$util.error("Hangover seems to be broken...");
         process.exit(0);
     }
 
-    $$ncp('../package/', path, function(err) {
+    $$ncp(__dirname + '/package/', path, function(err) {
         if (err) {
             throw new Error(err);
             return console.error(err);
