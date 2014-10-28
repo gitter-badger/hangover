@@ -612,6 +612,12 @@
                                     return Ho.out(message);
                                 }
                                 if (this.$$logfd === null) {
+                                    try {
+                                        $$fs.readdirSync($file('logs'));
+                                    } catch (e) {
+                                        $$fs.mkdirSync($file('logs'), '0755');
+                                        Ho.out("Log directory created in " + $file('logs'));
+                                    }
                                     this.$$logfd = $$fs.openSync($file('logs', this.$$logfile), 'w+');
                                 }
                                 message = $$util.format('%s ' + message + "\r\n", new Date());
