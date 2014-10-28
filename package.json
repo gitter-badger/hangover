@@ -1,10 +1,10 @@
 {
   "name": "hangover",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A structured theme app for a HapiJS / AngularJS website (or something else)",
-  "main": "index.js",
+  "main": "./bin/package/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "keywords": [
     "hapijs",
@@ -13,6 +13,7 @@
   ],
   "author": "Paul Rad <paul@paulrad.com>",
   "license": "MIT",
+  "repository": "paulrad/hangover",
   "bin": {
     "hangover": "./bin/hangover"
   },
