@@ -5,68 +5,35 @@ HapiJS + Mongoose + AngularJS template
 
 ##Installation
 
+** From NPM **
+```
+npm install hangover -g
+```
+
 ** From git **
 ```
-git clone git@github.com:paulrad/hangover.git ./my-project
-cd my-project && npm install`
-node index.js
+git clone git@github.com:paulrad/hangover.git ./hangover
+./hangover/bin/hangover example-project
+cd ./example-project
+npm install
+node server.js
 ```
 
 ## Start
 
-### Default index.js
 
-This file is required to create your server and load differents controllers / models.
+### Binary client
 
+#### Create a new project
+
+At this moment, hangover supports only one command (with --version and usages), the basic project creation command:
 ```
-;(function  HangOver(root, undefined) {
-
-    'use strict';
-
-    var Ho;
-
-    root.Ho = Ho = require('./sys/hangover.js');
-
-    // Hello message
-    Ho.out("Welcome to HangOver... burp :s");
-
-    // Loading requireds components
-    Ho.require(['mongoose', 'hapi', 'swig']);
-
-    // Mongoose initialisation
-    Ho.module('mongoose').connect(Ho.config('mongoose.uri'), Ho.config('mongoose.options'));
-
-        Ho.module('mongoose').connection.on('open', function() {
-            Ho.out("HangOver is connected on your Mongo Database over Mongoose.");
-            Ho.models();
-        });
-        Ho.module('mongoose').connection.on('error', Ho.err.bind(console));
-
-    // Hapi initialisation
-    Ho.module('hapi.server', function(Hapi) {
-        var server = new Hapi.Server(Ho.config('server.host'), Ho.config('server.port'), Ho.config('server.options'));
-
-        server.start(function() {
-            Ho.out("Server started at: " + server.info.uri);
-        });
-
-        // Set routes
-        server.route(Ho.routes());
-
-        // Set views engine system
-        Ho.module('swig').setDefaults(Ho.config('swig.options'));
-        server.views({
-            engines: {
-                html: Ho.module('swig')
-            },
-            path: Ho.path('views')
-        })
-
-        return server;
-    });
- 
-})(global);
+hangover [projectpath]
 ```
+Where [projectpath] must be an unexisting directory or an empty directory.
+
+Hangover will copy all defaults files in the [projectpath], so, when the command is complete, go to the [projectpath] and run a `npm install` to fetch dependencies.
+When everything will be ok, you can start the server by `node server.js`.
 
 ### Default configuration file
 
@@ -76,6 +43,7 @@ You must create a configuration file in `api/configuration/config.js`
 module.exports = {
 
     // Hangover
+    // nothing... but one day, some cool options here
     hangover: {
 
     },
@@ -132,6 +100,7 @@ module.exports = {
 
             cache: false,
 
+            // we replace defaults swig {{}} for AngularJS
             varControls: ['<?', '?>']
 
         }
@@ -182,4 +151,19 @@ If you need to call another method (for example a method called `informations` i
 Controllers must be located in the `api/controllers/` directory.
 
 Hangover will load every files presents in this directory (you can could structure yours controllers in child directories if you want).
+
+
+### Models
+
+@todo
+
+
+### Views
+
+@todo
+
+
+### Tasks
+
+@todo
 
