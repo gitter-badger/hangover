@@ -1,6 +1,6 @@
 {
   "name": "hangover",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "A structured theme app for a HapiJS / AngularJS website (or something else)",
   "main": "./bin/package/server.js",
   "scripts": {
