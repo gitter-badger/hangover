@@ -35,6 +35,7 @@
 
         // cron module
         var $$cron = require('cron').CronJob;
+
     } catch (e) {
         console.error("Undefined module - please try a npm install and restart hangover");
         console.error(e);
@@ -52,6 +53,12 @@
         tasks: $$path.join(__dirname, '../api/tasks/'),
         views: $$path.join(__dirname, '../api/views/')
     };
+
+    // configurations
+    var $$configurations = {};
+
+    // current environment (will be set in config.js)
+    var $$environment = 'default';
 
     // loaded modules
     var $$modules = {};
@@ -307,13 +314,37 @@
                         this.err(["Unable to find the configuration file.", "Please, add a config.js file in /api/configuration/ directory."]);
                         process.exit();
                     });
+                    var directions = $$modules['$$configuration'];
+                    if (! directions || typeof directions !== 'object') {
+                        return Ho.err("Missconfigured configuration file. See documentation.");
+                    }
+                    if (! directions.directives || typeof directions.directives !== 'object' ||
+                        ! directions.directives.default || 
+                            (typeof directions.directives.default !== 'object' && typeof directions.directives.default !== 'string')
+                        ) {
+                        return Ho.err("Your configuration file must contains at less a default directive.");
+                    }
+                    if (typeof directions.environment !== 'undefined') {
+                        $$environment = directions.environment;
+                    }
+                    if (typeof directions.directives[$$environment] === 'string') {
+                        var path = $file('configuration', directions.directives[$$environment]);
+                        try {
+                            $$configurations = require(path);
+                        } catch(e) {
+                            return Ho.err("Invalid configuration file specified, i can't get " + path);
+                        }
+                    } else {
+                        $$configurations = directions.directives[$$environment];
+                    }
+                    Ho.out("Hangover loaded in " + $$environment + " mode.");
                 }
 
                 if (! attribute) {
-                    return $$modules['$$configuration'];
+                    return $$configurations;
                 }
 
-                return $treeKeys(this.config(), attribute);
+                return $treeKeys($$configurations, attribute);
             },
 
             /**
@@ -372,7 +403,8 @@
                     });
                     return this;
                 }
-                return $$util.error(' /!\\ ' + message);
+                $$util.error(' /!\\ ' + message);
+                return new Error(message);
             },
 
             /**

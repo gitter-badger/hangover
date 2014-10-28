@@ -1,72 +1,22 @@
 /**
  * Hangover
  * Configuration file
- *
- *
- *
  */
 
 module.exports = {
 
-    // Hangover
-    hangover: {
+    // what is the current environment
+    environment: process.env.ENVIRONMENT,
 
-    },
+    // list of directives
+    directives: {
 
-    // Mongoose
-    mongoose: {
-        /**
-         * MongoDB standard connection uri
-         * @see for references
-         * http://docs.mongodb.org/manual/reference/connection-string/
-         */
-        uri: 'mongodb://localhost:27017/hangover'
-    },
+        // when environment is undefined or different than others directives
+        default: 'config.development.js',
 
+        // if environment === 'production'
+        production: 'config.production.js'
 
-    // Server
-    server: {
-
-        host: 'localhost',
-
-        port: 3012,
-
-        /**
-         * HapiJS server options
-         * @see for references
-         * http://hapijs.com/api#server-options
-         */
-        options: {
-
-            cors: true,
-
-            validation: {
-
-                abortEarly: false,
-
-            },
-
-            router: {
-
-                isCaseSensitive: false,
-
-                stripTrailingSlash: true
-
-            }
-
-        }
-
-    },
-
-    // Swig
-    swig: {
-        
-        options: {
-
-            cache: false,
-
-            varControls: ['<?', '?>']
-
-        }
     }
+
 };
