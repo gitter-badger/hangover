@@ -8,7 +8,7 @@
 
 ;(function(commands, undefined) {
 
-    var __version = '0.2.0';
+    var __version = '0.2.1';
 
     var $$util = require('util');
 
@@ -45,6 +45,7 @@
     // startApp(string: path)
     var startApp = function(path) {
         var exec = require('child_process').exec,
+            spawn = require('child_process').spawn,
             child;
 
         if (! path) {
@@ -57,17 +58,21 @@
 
         var runApp = function(path) {
             $$util.puts("Hangover starts now :-)");
-            child = exec('cd ' + path + ' && npm start', function(error, stdout, stderr) {
-                // @todo
-                console.log(stdout);
-                console.log(stderr);
+            child = spawn('npm', ['start', '--silent']);
+            child.stdout.on('data', function(data) {
+                buf = $$util.format('%s', String(data));
+                $$util.print(buf);
+            });
+            child.stderr.on('data', function(data) {
+                buf = $$util.format('%s', String(data));
+                $$util.print(buf);
             });
         };
 
         if (! $$fs.existsSync(path + '/node_modules')) {
             $$util.puts("Hangover installing dependencies (npm install)... please wait a moment.");
             $$util.puts("This operation will performed only on the first launch and cant take few minutes depending the quality of your connection.");
-            child = exec('cd ' + path + ' && npm install --silently && cd -', function(error, stdout, stderr) {
+            child = exec('cd ' + path + ' && npm install --quiet && cd -', function(error, stdout, stderr) {
                 if (error) {
                     $$util.error(error);
                     process.exit();
