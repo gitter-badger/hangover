@@ -22,7 +22,7 @@ hangover
 npm install hangover -g
 ```
 
-##Generate a Hangover website
+##Generate a new nangover website
 ```bash
 hangover new my-project ./my-project
 cd ./my-project
