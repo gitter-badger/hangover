@@ -1,7 +1,8 @@
 hangover
 ========
-[![Build Status](https://travis-ci.org/paulrad/hangover.svg?branch=master)](https://travis-ci.org/paulrad/hangover)
 (HapiJS + Mongoose + AngularJS) boilerplate
+
+[![Build Status](https://travis-ci.org/paulrad/hangover.svg?branch=master)](https://travis-ci.org/paulrad/hangover)
 
 ##Features
 
