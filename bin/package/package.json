@@ -20,7 +20,9 @@
     "file": "^0.2.2",
     "boom": "^2.6.0",
     "joi": "^4.7.0",
-    "cron": "^1.0.5"
+    "cron": "^1.0.5",
+    "nodemailer": "^1.3.0",
+    "nodemailer-smtp-transport": "^0.1.13"
   },
   "devDependencies": {
     "gulp": "^3.8.9",
