@@ -1,13 +1,15 @@
 /**
- * HangOver
- * Hapi Angular (worst pun)
+ *
+ * Hangover
+ * HapiJS - AngularJS - Mongoose boilerplate
  *
  *
- * HangOver Sys Class
+ * @authors
+ * Paul Rad <paul@paulrad.com>
  *
  */
 
-;(function  HangOver(undefined) {
+;(function  HangOver(root, undefined) {
 
     'use strict';
 
@@ -29,6 +31,12 @@
 
         // joi module
         var $$joi = require('joi');
+
+        // nodemailer module
+        var $$nodemailer = require('nodemailer');
+
+        // smtptransport module
+        var $$smtptransport = require('nodemailer-smtp-transport');
 
         // underscore module
         var $$underscore = require('underscore');
@@ -53,6 +61,9 @@
         tasks: $$path.join(__dirname, '../api/tasks/'),
         views: $$path.join(__dirname, '../api/views/')
     };
+
+    // running : must be set to `true` if $install private method is invoked
+    var $$running = false;
 
     // configurations
     var $$configurations = {};
@@ -87,9 +98,10 @@
     /**
      * Return HangOver instance
      */
-    module.exports = new (function() {
 
-        var $self = this;
+    var Ho;
+
+    root.Ho = Ho = module.exports = new (function() {
 
         /**
          * $file(string: path, string: filename?)
@@ -255,6 +267,111 @@
             };
             return reply;
         });
+
+
+        /**
+         * $install(object: callbacks?)
+         * @type private
+         * run defaults routines
+         * @invoked by `run`
+         */
+        var $install = function(callbacks) {
+
+            var __executed = false, // false until the end the instructions lists
+                __completes = 0, // completed tasks
+                __success = true,
+                __tasks = 0; // number of tasks (mongoose is one task, hapijs one task...)
+
+            callbacks = callbacks || {};
+
+            // tictac function
+            var tictac = function() {
+                // all tasks are completed ?
+                if (__executed === false || __completes !== __tasks) {
+                    setTimeout(tictac.bind(this), 15);
+                } else {
+                    if (__success === true && typeof callbacks.after === 'function') {
+                        callbacks.after.call(Ho);
+                    }
+                }
+            };
+
+            var error = function(msg) {
+                var e;
+                if (typeof msg === 'string')
+                    e = new Error(msg)
+                else if (msg instanceof Error)
+                    e = msg;
+                __success = false;
+                __completes = 0;
+                if (typeof callbacks.error === 'function') {
+                    callbacks.error.call(Ho, e);
+                } else {
+                    throw e;
+                }
+            };
+
+            if (typeof callbacks.before === 'function') {
+                callbacks.before.call(Ho);
+            }
+
+            tictac();
+
+            Ho.require(['mongoose', 'hapi', 'swig']);
+
+            // install mongoose if defined in configuration file
+            if (typeof Ho.config('mongoose.host') !== undefined) {
+                __tasks += 1;
+                Ho.module('mongoose').connect(Ho.config('mongoose.uri'), Ho.config('mongoose.options'));
+
+                Ho.module('mongoose').connection.on('open', function() {
+                    Ho.out("Hangover is connected on your Mongo Database over Mongoose.");
+                    Ho.models();
+                    __completes += 1;
+                });
+                Ho.module('mongoose').connection.on('error', error.bind(this));
+            }
+
+            // HapiJS installation
+            var host = Ho.config('server.host');
+            if (typeof host === 'function') host = host(); // may be a function
+
+            if (typeof host === 'undefined') {
+                Ho.err("Undefined host in your configuration file").throw();
+            }
+
+            Ho.module('hapi.server', function(Hapi) {
+                var server = new Hapi.Server(Ho.config('server.host'), Ho.config('server.port'), Ho.config('server.options'));
+
+                __tasks += 1;
+                server.start(function() {
+                    Ho.out("Hangover server started at: " + server.info.uri);
+                    __completes += 1;
+                });
+
+                // Set routes
+                server.route(Ho.routes());
+
+                // Set views engine system
+                Ho.module('swig').setDefaults(Ho.config('swig.options'));
+                server.views({
+                    engines: {
+                        html: Ho.module('swig')
+                    },
+                    path: Ho.path('views')
+                })
+
+                // Setup tasks
+                Ho.tasks();
+
+                return server;
+            });
+
+            __executed  = true;
+
+        };
+
+
 
         /**
          * Return hangover public properties and methods
@@ -608,6 +725,12 @@
 
 
             /**
+             * run(object: callbacks?)
+             * @see private $install for doc
+             */
+            run: $install.bind(Ho),
+
+            /**
              * HangOver.tasks()
              * @description
              * Load tasks rules and store them to the `$$tasks` private var
@@ -758,6 +881,8 @@
                         setupTask(k, o);
                     }
                 }
+
+                return $$taks;
             },
 
 
@@ -780,4 +905,4 @@
         };
     });
 
-})();
+})(global);

@@ -67,5 +67,23 @@ module.exports = {
             varControls: ['<?', '?>']
 
         }
+    },
+
+    // Nodemailer
+    nodemailer: {
+
+        // see https://github.com/andris9/nodemailer-smtp-transport#usage
+        options: {
+
+            host: 'http://paulrad.com',
+
+            // see https://github.com/andris9/nodemailer-smtp-transport#authentication
+            auth: {
+
+                user: 'paul@paulrad.com',
+
+                pass: 'pelxxo7o'
+            }
+        }
     }
 };
