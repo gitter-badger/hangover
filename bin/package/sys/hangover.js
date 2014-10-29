@@ -9,49 +9,79 @@
  *
  */
 
+/*jslint white: true */
 ;(function  HangOver(root, undefined) {
+
+    /*jshint -W081 */
 
     'use strict';
 
+    var Ho,
+
+        // modules
+        $$util,
+        $$fs,
+        $$file,
+        $$path,
+        $$boom,
+        $$joi,
+        $$nodemailer,
+        $$smtptransport,
+        $$underscore,
+        $$cron,
+
+        // privates properties
+        $$paths,
+        $$running,
+        $$configurations,
+        $$environment,
+        $$modules,
+        $$singletons,
+        $$controllers,
+        $$routes,
+        $$schemas,
+        $$models,
+        $$tasks,
+        $$currentModel;
+
     try {
         // util module
-        var $$util = require('util');
+        $$util = require('util');
 
         // fs module
-        var $$fs = require('fs');
+        $$fs = require('fs');
 
         // file module
-        var $$file = require('file');
+        $$file = require('file');
 
         // path module
-        var $$path = require('path');
+        $$path = require('path');
 
         // boom module
-        var $$boom = require('boom');
+        $$boom = require('boom');
 
         // joi module
-        var $$joi = require('joi');
+        $$joi = require('joi');
 
         // nodemailer module
-        var $$nodemailer = require('nodemailer');
+        $$nodemailer = require('nodemailer');
 
         // smtptransport module
-        var $$smtptransport = require('nodemailer-smtp-transport');
+        $$smtptransport = require('nodemailer-smtp-transport');
 
         // underscore module
-        var $$underscore = require('underscore');
+        $$underscore = require('underscore');
 
         // cron module
-        var $$cron = require('cron').CronJob;
+        $$cron = require('cron').CronJob;
 
     } catch (e) {
-        console.error("Undefined module - please try a npm install and restart hangover");
-        console.error(e);
-        process.exit(0);
+        return Ho.err("Undefined module - please try a npm install and restart hangover").throw(e);
     }
 
     // differents paths
-    var $$paths = {
+    /*jslint nomen: true*/
+    $$paths = {
         configuration: $$path.join(__dirname, '../api/configuration/'),
         controllers: $$path.join(__dirname, '../api/controllers/'),
         helpers: $$path.join(__dirname, '../api/helpers/'),
@@ -61,45 +91,44 @@
         tasks: $$path.join(__dirname, '../api/tasks/'),
         views: $$path.join(__dirname, '../api/views/')
     };
+    /*jslint nomen: false*/
 
     // running : must be set to `true` if $install private method is invoked
-    var $$running = false;
+    $$running = false;
 
     // configurations
-    var $$configurations = {};
+    $$configurations = {};
 
     // current environment (will be set in config.js)
-    var $$environment = 'default';
+    $$environment = 'default';
 
     // loaded modules
-    var $$modules = {};
+    $$modules = {};
 
     // list of loaded class
-    var $$singletons = {};
+    $$singletons = {};
 
     // controllers list
-    var $$controllers = null;
+    $$controllers = null;
 
     // routes list
-    var $$routes = null;
+    $$routes = null;
 
     // schemas
-    var $$schemas = {};
+    $$schemas = {};
 
     // models
-    var $$models = {};
+    $$models = {};
 
     // tasks
-    var $$tasks = null;
+    $$tasks = null;
 
     // current model
-    var $$currentModel = null;
+    $$currentModel = null;
 
     /**
      * Return HangOver instance
      */
-
-    var Ho;
 
     root.Ho = Ho = module.exports = new (function() {
 
@@ -167,12 +196,15 @@
          >> 'hello world'
          */
         var $treeKeys = (function(source, selector) {
-            var keymap = selector.split('.'),
+            var key = null,
+                keymap = selector.split('.'),
                 tree = source;
 
-            if (! tree) return null;
+            if (! tree) {
+                return null;
+            }
 
-            for (var key in keymap) {
+            for (key in keymap) {
                 if (tree[keymap[key]]) {
                     tree = tree[keymap[key]];
                 } else {
@@ -188,18 +220,22 @@
          * Override the hangover reply object
          */
         var $overrideReply = (function(reply) {
-            // local copy for reply.view
-            var __view = reply.view;
 
-            // default response callbacks (when reply.response is called)
-            var __config = {
-                error: function(error) {
-                    return (error);
-                },
-                success: function(doc) {
-                    return {success: true};
-                }
-            };
+            
+            var __reply = reply,
+
+                // local copy for reply.view
+                __view = __reply.view,
+
+                // default response callbacks (when reply.response is called)
+                __config = {
+                    error: function(error) {
+                        return error;
+                    },
+                    success: function() {
+                        return {success: true};
+                    }
+                };
 
             /**
              * reply.set(object: config)
@@ -217,7 +253,7 @@
              */
             reply.set = function(config) {
                 if (config.success && typeof config.success === 'function') {
-                    __config.success = config.success
+                    __config.success = config.success;
                 }
                 if (config.error && typeof config.error === 'function') {
                     __config.error = config.error;
@@ -230,10 +266,10 @@
              */
             reply.response = function(error, doc) {
                 if (error) {
-                    return reply.call(this, __config.error(error));
+                    return __reply.call(Ho, __config.error(error));
                 }
                 if (doc) {
-                    return reply.call(this, __config.success(doc));
+                    return __reply.call(Ho, __config.success(doc));
                 }
                 // nothing to do... i'm waiting the mongo response
             };
@@ -523,8 +559,12 @@
 
 
             /**
-             * HangOver.out(string: message)
-             * Return message on stdout
+             * HangOver.err(string: message)
+             * Display message on stderr
+             *
+             * @return new instance with some methods:
+             *  - err.throw(<string|exception>: e)
+             *    throw a new exception with passed arg
              */
             err: function(message) {
                 var self = this;
@@ -535,12 +575,17 @@
                     });
                     return this;
                 }
+
                 $$util.error('@: ' + message);
+
                 return new (function() {
                     return {
                         // show debug trace
-                        throw: function() {
-                            throw new Error(message);
+                        throw: function(e) {
+                            if (e) {
+                                return throw new Error(e);
+                            }
+                            return throw new Error(message);
                         }
                     }
                 });
@@ -548,9 +593,9 @@
 
             /**
              * HangOver.leton(string: classname, function: inclusionFn?)
-             * Return a class instance
              * If `inclusionFn` is passed, your function will be called
              * in the HangOver instance (with the Singleton instance in the 1st parameter)
+             * @return class instance
              */
             leton: function(className, inclusionFn) {
                 if (! $$singletons[className]) {
