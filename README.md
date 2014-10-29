@@ -1,11 +1,11 @@
 hangover
 ========
 [![Build Status](https://travis-ci.org/paulrad/hangover.svg?branch=master)](https://travis-ci.org/paulrad/hangover)
-
-HapiJS + Mongoose + AngularJS + Swig = hangover
+(HapiJS + Mongoose + AngularJS) boilerplate
 
 ##Features
 
+* Init a full project structure in one second (or less)
 * Highly customisable
 * MVC pattern
 * Scheduled tasks
