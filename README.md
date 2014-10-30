@@ -1,6 +1,8 @@
 hangover
 ========
-(HapiJS + Mongoose + AngularJS) boilerplate
+(HapiJS + Mongoose + AngularJS) kickstart
+
+Best practice directory structure for HapiJS & AngularJS
 
 [![Build Status](https://travis-ci.org/paulrad/hangover.svg?branch=master)](https://travis-ci.org/paulrad/hangover)
 
