@@ -5,6 +5,7 @@ hangover
 Best practice directory structure for HapiJS & AngularJS
 
 [![Build Status](https://travis-ci.org/paulrad/hangover.svg?branch=master)](https://travis-ci.org/paulrad/hangover)
+[![Code Climate](https://codeclimate.com/github/paulrad/hangover/badges/gpa.svg)](https://codeclimate.com/github/paulrad/hangover)
 
 ##Features
 

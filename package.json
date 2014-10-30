@@ -1,6 +1,6 @@
 {
   "name": "hangover",
-  "version": "0.3.45",
+  "version": "0.3.461",
   "description": "A structured kickstarter for a HapiJS / AngularJS website (or something else)",
   "main": "./bin/package/server.js",
   "scripts": {
