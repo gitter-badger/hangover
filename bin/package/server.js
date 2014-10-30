@@ -1,17 +1,13 @@
 /**
- * HangOver
- * Hapi Angular (worst pun)
- * Structured based app
- *
- * @ sys/hangover.js
- * api references
+ * Default kickstart program
  */
 
-;(function  HangOver(undefined) {
+;(function  Kickstart(undefined) {
 
     'use strict';
 
-    require('./sys/hangover.js');
+    // init hangover system class
+    require('hangover-sysclass');
 
     // Ho is now defined
 
