@@ -7,7 +7,7 @@
     'use strict';
 
     // init hangover system class
-    require('hangover-sysclass');
+    require('hangover-system');
 
     // Ho is now defined
 
