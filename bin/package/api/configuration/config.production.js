@@ -26,7 +26,7 @@ module.exports = {
     // Server
     server: {
 
-        host: 'localhost',
+        host: '0.0.0.0',
 
         port: 3012,
 
@@ -37,7 +37,7 @@ module.exports = {
          */
         options: {
 
-            cors: true,
+            cors: false,
 
             validation: {
 
